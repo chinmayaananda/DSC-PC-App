@@ -1,0 +1,45 @@
+{
+  "name": "pdf-toolbox",
+  "version": "1.0.0",
+  "description": "Offline PDF signing, redaction & stamping desktop app",
+  "main": "main.js",
+  "author": "Chinmayaananda",
+  "license": "MIT",
+  "scripts": {
+    "dev": "electron .",
+    "build": "electron-builder",
+    "postinstall": "electron-builder install-app-deps"
+  },
+  "dependencies": {
+    "electron-store": "^8.1.0"
+  },
+  "devDependencies": {
+    "electron": "^31.0.0",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.chinmayaananda.pdftoolbox",
+    "productName": "PDF Toolbox",
+    "win": {
+      "target": "nsis",
+      "icon": "../assets/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    },
+    "extraResources": [
+      {
+        "from": "../backend/dist/backend.exe",
+        "to": "backend.exe"
+      }
+    ],
+    "files": [
+      "main.js",
+      "preload.js",
+      "src/**"
+    ]
+  }
+}
