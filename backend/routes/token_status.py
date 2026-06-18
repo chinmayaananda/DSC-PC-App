@@ -13,6 +13,10 @@ from fastapi.responses import JSONResponse
 router = APIRouter()
 
 KNOWN_DLL_PATHS = [
+    r"C:\Windows\System32\eps2003csp11v2.dll",
+    r"C:\Windows\System32\eps2003csp11v2_s.dll",
+    r"C:\Windows\SysWOW64\eps2003csp11v2.dll",
+    r"C:\Windows\SysWOW64\eps2003csp11v2_s.dll",
     r"C:\Windows\System32\eTPKCS11.dll",
     r"C:\Windows\SysWOW64\eTPKCS11.dll",
     r"C:\Windows\System32\eps2003csp11.dll",

@@ -1,7 +1,7 @@
 {
   "name": "pdf-toolbox",
-  "version": "1.0.0",
-  "description": "Offline PDF signing, redaction & stamping desktop app",
+  "version": "1.0.1",
+  "description": "Offline PDF signing, redaction and stamping",
   "main": "main.js",
   "author": "Chinmayaananda",
   "license": "MIT",
@@ -11,10 +11,10 @@
     "postinstall": "electron-builder install-app-deps"
   },
   "dependencies": {
-    "electron-store": "^8.1.0"
+    "electron-store": "^7.0.3"
   },
   "devDependencies": {
-    "electron": "^31.0.0",
+    "electron": "^31.7.7",
     "electron-builder": "^24.13.3"
   },
   "build": {

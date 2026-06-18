@@ -46,6 +46,21 @@ class CK_ATTRIBUTE(ctypes.Structure):
     ]
 
 
+KNOWN_DLL_PATHS = [
+    r"C:\Windows\System32\eps2003csp11v2.dll",
+    r"C:\Windows\System32\eps2003csp11v2_s.dll",
+    r"C:\Windows\SysWOW64\eps2003csp11v2.dll",
+    r"C:\Windows\SysWOW64\eps2003csp11v2_s.dll",
+    r"C:\Windows\System32\eTPKCS11.dll",
+    r"C:\Windows\SysWOW64\eTPKCS11.dll",
+    r"C:\Windows\System32\eps2003csp11.dll",
+    r"C:\Windows\SysWOW64\eps2003csp11.dll",
+    r"C:\Program Files\Hypersecu\HyperPKI\eTPKCS11.dll",
+    r"C:\Program Files (x86)\Hypersecu\HyperPKI\eTPKCS11.dll",
+    r"C:\Program Files\EnterSafe\ePass2003\eTPKCS11.dll",
+]
+
+
 def sign_pdf(
     input_path: str,
     output_path: str,

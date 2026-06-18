@@ -38,7 +38,7 @@ function initSettingsPage(backendUrl) {
               Typically: <code style="background:var(--surface-2); padding:1px 4px; border-radius:3px;">C:\\Windows\\System32\\eTPKCS11.dll</code>
             </div>
           </div>
-          <button class="btn-secondary" id="test-token-btn">
+          <button class="btn-secondary" id="test-token-btn" style="margin-top: 10px;">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15">
               <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
             </svg>
@@ -67,7 +67,7 @@ function initSettingsPage(backendUrl) {
             <label for="s-location">Default Location</label>
             <input type="text" id="s-location" placeholder="e.g. New Delhi, India" />
           </div>
-          <button class="btn-primary" id="save-sig-defaults-btn" style="align-self:flex-start">Save Defaults</button>
+          <button class="btn-primary" id="save-sig-defaults-btn" style="align-self:flex-start; margin-top: 10px;">Save Defaults</button>
         </div>
       </div>
 
@@ -84,8 +84,8 @@ function initSettingsPage(backendUrl) {
                 <div class="settings-row-desc">Choose dark or light interface</div>
               </div>
               <div style="display:flex; gap:8px;">
-                <button class="btn-secondary theme-opt" data-theme="dark" id="theme-dark-btn">🌙 Dark</button>
-                <button class="btn-secondary theme-opt" data-theme="light" id="theme-light-btn">☀️ Light</button>
+                <button class="btn-secondary theme-opt" data-theme="dark" id="theme-dark-btn">Dark</button>
+                <button class="btn-secondary theme-opt" data-theme="light" id="theme-light-btn">Light</button>
               </div>
             </div>
           </div>
