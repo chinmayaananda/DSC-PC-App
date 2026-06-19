@@ -22,7 +22,7 @@ function initSettingsPage(backendUrl) {
     <div style="flex:1; min-height:0; overflow-y:auto; padding:24px; display:flex; flex-direction:column; gap:24px;">
 
       <!-- DSC Token -->
-      <div style="background:var(--surface); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); overflow:hidden;">
+      <div style="background:var(--surface); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); overflow:hidden; flex-shrink:0;">
         <div style="padding:16px 20px; border-bottom:1px solid var(--border-subtle);">
           <h2 style="font-size:14px; font-weight:600;">DSC Token</h2>
           <p style="font-size:12px; color:var(--text-secondary); margin-top:2px;">PKCS#11 middleware settings for your Hypersecu HYP2003</p>
@@ -49,7 +49,7 @@ function initSettingsPage(backendUrl) {
       </div>
 
       <!-- Signature Defaults -->
-      <div style="background:var(--surface); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); overflow:hidden;">
+      <div style="background:var(--surface); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); overflow:hidden; flex-shrink:0;">
         <div style="padding:16px 20px; border-bottom:1px solid var(--border-subtle);">
           <h2 style="font-size:14px; font-weight:600;">Signature Defaults</h2>
           <p style="font-size:12px; color:var(--text-secondary); margin-top:2px;">Pre-filled values for the Sign tab</p>
@@ -72,7 +72,7 @@ function initSettingsPage(backendUrl) {
       </div>
 
       <!-- Appearance -->
-      <div style="background:var(--surface); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); overflow:hidden;">
+      <div style="background:var(--surface); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); overflow:hidden; flex-shrink:0;">
         <div style="padding:16px 20px; border-bottom:1px solid var(--border-subtle);">
           <h2 style="font-size:14px; font-weight:600;">Appearance</h2>
         </div>
@@ -93,12 +93,12 @@ function initSettingsPage(backendUrl) {
       </div>
 
       <!-- About -->
-      <div style="background:var(--surface); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); overflow:hidden;">
+      <div style="background:var(--surface); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); overflow:hidden; flex-shrink:0;">
         <div style="padding:16px 20px; border-bottom:1px solid var(--border-subtle);">
           <h2 style="font-size:14px; font-weight:600;">About</h2>
         </div>
         <div style="padding:20px; font-size:13px; color:var(--text-secondary); line-height:2;">
-          <div><strong style="color:var(--text-primary)">PDF Toolbox</strong> v1.0.7</div>
+          <div><strong style="color:var(--text-primary)">PDF Toolbox</strong> v1.0.8</div>
           <div>Offline PDF signing, redaction & stamping</div>
           <div>Built for Windows 11 with Hypersecu HYP2003 DSC</div>
           <div style="margin-top:10px;">

@@ -164,9 +164,12 @@ def sign_pdf(
                 contact_info=contact_info,
             )
 
+            from PIL import Image
+            transparent_bg = Image.new("RGBA", (1, 1), (0, 0, 0, 0))
+
             style = TextStampStyle(
                 stamp_text="Signed by: %(signer)s\nDate: %(ts)s\nReason: %(reason)s",
-                background=None,
+                background=transparent_bg,
             )
 
             with open(str(output_p), "wb") as outf:
