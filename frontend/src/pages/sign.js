@@ -262,6 +262,8 @@ function initSignPage(backendUrl) {
     setStatus('Signing... please wait', '');
 
     const cert = tokenInfo.certs[0] || {};
+    const sigImagePath = await window.api.getStore('sigImagePath') || '';
+    
     try {
       const result = await fetch(`${backendUrl}/api/sign`, {
         method: 'POST',
@@ -277,6 +279,7 @@ function initSignPage(backendUrl) {
           signer_name: document.getElementById('sign-name').value,
           reason: document.getElementById('sign-reason').value,
           location: document.getElementById('sign-location').value,
+          image_path: sigImagePath,
         }),
       });
       if (!result.ok) {

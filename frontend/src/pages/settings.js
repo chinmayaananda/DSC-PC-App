@@ -67,6 +67,16 @@ function initSettingsPage(backendUrl) {
             <label for="s-location">Default Location</label>
             <input type="text" id="s-location" placeholder="e.g. New Delhi, India" />
           </div>
+          <div class="form-group" style="margin:0">
+            <label for="s-image">Signature Stamp Image (Optional)</label>
+            <div style="display:flex; gap:8px;">
+              <input type="text" id="s-image" placeholder="Path to .png or .jpg" style="flex:1" />
+              <button class="btn-secondary" id="sig-image-browse-btn">Browse</button>
+            </div>
+            <div style="font-size:11px; color:var(--text-muted); margin-top:5px;">
+              This image will replace the default signature background.
+            </div>
+          </div>
           <button class="btn-primary" id="save-sig-defaults-btn" style="align-self:flex-start; margin-top: 10px;">Save Defaults</button>
         </div>
       </div>
@@ -98,7 +108,7 @@ function initSettingsPage(backendUrl) {
           <h2 style="font-size:14px; font-weight:600;">About</h2>
         </div>
         <div style="padding:20px; font-size:13px; color:var(--text-secondary); line-height:2;">
-          <div><strong style="color:var(--text-primary)">PDF Toolbox</strong> v1.0.8</div>
+          <div><strong style="color:var(--text-primary)">PDF Toolbox</strong> v1.0.9</div>
           <div>Offline PDF signing, redaction & stamping</div>
           <div>Built for Windows 11 with Hypersecu HYP2003 DSC</div>
           <div style="margin-top:10px;">
@@ -118,6 +128,7 @@ function initSettingsPage(backendUrl) {
   window.api.getStore('signerName').then(v => { if (v) document.getElementById('s-name').value = v; });
   window.api.getStore('signerReason').then(v => { if (v) document.getElementById('s-reason').value = v; });
   window.api.getStore('signerLocation').then(v => { if (v) document.getElementById('s-location').value = v; });
+  window.api.getStore('sigImagePath').then(v => { if (v) document.getElementById('s-image').value = v; });
 
   // DLL browse
   document.getElementById('dll-browse-btn').addEventListener('click', async () => {
@@ -133,6 +144,17 @@ function initSettingsPage(backendUrl) {
 
   document.getElementById('dll-path').addEventListener('change', () => {
     window.api.setStore('dllPath', document.getElementById('dll-path').value);
+  });
+
+  // Sig Image browse
+  document.getElementById('sig-image-browse-btn').addEventListener('click', async () => {
+    const path = await window.api.openFile({
+      title: 'Select Signature Stamp Image',
+      filters: [{ name: 'Images', extensions: ['png', 'jpg', 'jpeg'] }],
+    });
+    if (path) {
+      document.getElementById('s-image').value = path;
+    }
   });
 
   // Test token
@@ -164,6 +186,7 @@ function initSettingsPage(backendUrl) {
     window.api.setStore('signerName', document.getElementById('s-name').value);
     window.api.setStore('signerReason', document.getElementById('s-reason').value);
     window.api.setStore('signerLocation', document.getElementById('s-location').value);
+    window.api.setStore('sigImagePath', document.getElementById('s-image').value);
     showToast('Defaults saved', 'success');
   });
 

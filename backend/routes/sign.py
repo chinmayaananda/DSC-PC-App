@@ -22,6 +22,7 @@ class SignRequest(BaseModel):
     reason: str = "Digitally Signed"
     location: str = ""
     contact_info: str = ""
+    image_path: str = ""
 
 
 @router.post("/sign")
@@ -42,6 +43,7 @@ def sign(req: SignRequest):
         reason=req.reason,
         location=req.location,
         contact_info=req.contact_info,
+        image_path=req.image_path,
     )
     if not result["success"]:
         raise HTTPException(status_code=500, detail=result["error"])

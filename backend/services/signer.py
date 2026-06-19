@@ -80,6 +80,7 @@ def sign_pdf(
     reason: str = "Digitally Signed",
     location: str = "",
     contact_info: str = "",
+    image_path: str = "",
 ) -> dict:
     """
     Signs a PDF using the DSC token via PKCS#11.
@@ -165,11 +166,18 @@ def sign_pdf(
             )
 
             from PIL import Image
-            transparent_bg = Image.new("RGBA", (1, 1), (0, 0, 0, 0))
+            stamp_bg = None
+            if image_path:
+                try:
+                    stamp_bg = Image.open(image_path)
+                except Exception:
+                    pass
+            if not stamp_bg:
+                stamp_bg = Image.new("RGBA", (1, 1), (0, 0, 0, 0))
 
             style = TextStampStyle(
                 stamp_text="Signed by: %(signer)s\nDate: %(ts)s\nReason: %(reason)s",
-                background=transparent_bg,
+                background=stamp_bg,
             )
 
             with open(str(output_p), "wb") as outf:
