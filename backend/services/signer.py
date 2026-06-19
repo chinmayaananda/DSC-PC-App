@@ -100,8 +100,9 @@ def sign_pdf(
     # ── 2. Import pyHanko PKCS#11 support ───────────────────────────────────────
     try:
         from pyhanko.sign.pkcs11 import open_pkcs11_session, PKCS11Signer
-        from pyhanko.sign import signers, fields
-        from pyhanko.sign.signers.pdf_signer import PdfSignatureMetadata
+        from pyhanko.sign import fields
+        from pyhanko.sign.signers.pdf_signer import PdfSignatureMetadata, PdfSigner
+        from pyhanko.stamp import TextStampStyle
         from pyhanko.sign.fields import SigFieldSpec
         from pyhanko.pdf_utils.incremental_writer import IncrementalPdfFileWriter
     except ImportError as e:
@@ -163,8 +164,21 @@ def sign_pdf(
                 contact_info=contact_info,
             )
 
+            style = TextStampStyle(
+                stamp_text="Signed by: %(signer)s\nDate: %(ts)s\nReason: %(reason)s",
+                background=None,
+            )
+
             with open(str(output_p), "wb") as outf:
-                signers.sign_pdf(writer, meta, signer=signer, output=outf)
+                PdfSigner(
+                    signature_meta=meta,
+                    signer=signer,
+                    stamp_style=style,
+                ).sign_pdf(
+                    pdf_out=writer,
+                    in_place=False,
+                    output=outf,
+                )
 
         return {"success": True, "output": str(output_p)}
 

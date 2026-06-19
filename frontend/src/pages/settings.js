@@ -98,7 +98,7 @@ function initSettingsPage(backendUrl) {
           <h2 style="font-size:14px; font-weight:600;">About</h2>
         </div>
         <div style="padding:20px; font-size:13px; color:var(--text-secondary); line-height:2;">
-          <div><strong style="color:var(--text-primary)">PDF Toolbox</strong> v1.0.6</div>
+          <div><strong style="color:var(--text-primary)">PDF Toolbox</strong> v1.0.7</div>
           <div>Offline PDF signing, redaction & stamping</div>
           <div>Built for Windows 11 with Hypersecu HYP2003 DSC</div>
           <div style="margin-top:10px;">
