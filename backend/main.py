@@ -8,6 +8,29 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+# --- Monkey-patch PyHanko to fix "Error -3 while decompressing data" on malformed PDFs ---
+try:
+    import zlib
+    import pyhanko.pdf_utils.filters as filters
+    orig_decompress = filters.decompress
+
+    def safe_decompress(data):
+        try:
+            return orig_decompress(data)
+        except zlib.error as e:
+            if 'Error -3' in str(e):
+                # Fallback to raw deflate
+                try:
+                    return zlib.decompress(data, -15)
+                except Exception:
+                    pass
+            raise e
+
+    filters.decompress = safe_decompress
+except ImportError:
+    pass
+# -----------------------------------------------------------------------------------------
+
 from routes import preview, token_status, sign, redact, stamp
 
 app = FastAPI(title="PDF Toolbox Backend", version="1.0.0")
