@@ -19,7 +19,7 @@ function initSettingsPage(backendUrl) {
       </div>
     </div>
 
-    <div style="flex:1; overflow-y:auto; padding:24px; display:flex; flex-direction:column; gap:24px;">
+    <div style="flex:1; min-height:0; overflow-y:auto; padding:24px; display:flex; flex-direction:column; gap:24px;">
 
       <!-- DSC Token -->
       <div style="background:var(--surface); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); overflow:hidden;">
@@ -98,7 +98,7 @@ function initSettingsPage(backendUrl) {
           <h2 style="font-size:14px; font-weight:600;">About</h2>
         </div>
         <div style="padding:20px; font-size:13px; color:var(--text-secondary); line-height:2;">
-          <div><strong style="color:var(--text-primary)">PDF Toolbox</strong> v1.0.1</div>
+          <div><strong style="color:var(--text-primary)">PDF Toolbox</strong> v1.0.5</div>
           <div>Offline PDF signing, redaction & stamping</div>
           <div>Built for Windows 11 with Hypersecu HYP2003 DSC</div>
           <div style="margin-top:10px;">

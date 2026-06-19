@@ -105,9 +105,13 @@ def sign_pdf(
         )
 
         # Build the signer
+        # NOTE: cert_label here is the CERTIFICATE OBJECT label on the token,
+        # NOT the token label (e.g. 'HYP2003'). Pass None to auto-select the
+        # first available signing certificate.
         signer = PKCS11Signer(
             pkcs11_session=session,
-            cert_label=cert_label if cert_label else None,
+            cert_label=None,   # auto-select first signing cert
+            key_label=None,    # auto-select first signing key
             use_raw_mechanism=False,
         )
 
