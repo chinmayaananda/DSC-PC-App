@@ -1,6 +1,6 @@
 {
   "name": "pdf-toolbox",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Offline PDF signing, redaction and stamping",
   "main": "main.js",
   "author": "Chinmayaananda",
