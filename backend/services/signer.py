@@ -1,50 +1,19 @@
 """
-Service: DSC PDF Signing via PKCS#11 (ctypes-based, no python-pkcs11 build required)
+Service: DSC PDF Signing via PKCS#11
 
-Uses ctypes to:
-1. Load eTPKCS11.dll
+Uses pyHanko + python-pkcs11 (pre-compiled wheel bundled in the .exe) to:
+1. Load the ePass2003/HYP2003 PKCS#11 DLL
 2. Open a session and log in with the user PIN
-3. Find the signing key and certificate
-4. Pass the signer key to pyHanko for PDF signing
+3. Auto-select the signing certificate and key
+4. Sign the PDF and place a visible signature field
 
-This avoids needing Microsoft C++ Build Tools to compile python-pkcs11.
+IMPORTANT: pkcs11 exceptions have empty str() representations.
+We must catch them by type and produce meaningful messages ourselves.
 """
 
-import ctypes
-import ctypes.wintypes
+import traceback
 from pathlib import Path
 from datetime import datetime
-
-# ─── PKCS#11 ctypes structures ────────────────────────────────────────────────
-
-CK_ULONG = ctypes.c_ulong
-CK_RV = ctypes.c_ulong
-CK_SESSION_HANDLE = ctypes.c_ulong
-CK_OBJECT_HANDLE = ctypes.c_ulong
-CK_BYTE_PTR = ctypes.POINTER(ctypes.c_ubyte)
-
-CKR_OK = 0
-CKF_SERIAL_SESSION = 0x00000004
-CKF_RW_SESSION = 0x00000002
-CKU_USER = 1
-
-CKO_CERTIFICATE = 1
-CKO_PRIVATE_KEY = 3
-CKA_CLASS = 0
-CKA_VALUE = 17
-CKA_LABEL = 3
-CKA_ID = 258
-
-CK_INVALID_HANDLE = 0
-
-
-class CK_ATTRIBUTE(ctypes.Structure):
-    _fields_ = [
-        ("type", CK_ULONG),
-        ("pValue", ctypes.c_void_p),
-        ("ulValueLen", CK_ULONG),
-    ]
-
 
 KNOWN_DLL_PATHS = [
     r"C:\Windows\System32\eps2003csp11v2.dll",
@@ -61,6 +30,44 @@ KNOWN_DLL_PATHS = [
 ]
 
 
+def _resolve_dll(dll_path: str) -> str | None:
+    if dll_path and Path(dll_path).exists():
+        return dll_path
+    for p in KNOWN_DLL_PATHS:
+        if Path(p).exists():
+            return p
+    return None
+
+
+def _pkcs11_error_message(e: Exception) -> str:
+    """
+    pkcs11 exception classes have empty str() but meaningful class names.
+    Convert them to human-readable messages.
+    """
+    cls = type(e).__name__
+    mapping = {
+        "PinIncorrect": "Incorrect PIN. Please check your PIN and try again.",
+        "PinLocked": "Token PIN is locked after too many wrong attempts. Please use your token management software to unlock it.",
+        "PinExpired": "Token PIN has expired. Please update your PIN using the token management software.",
+        "UserNotLoggedIn": "Authentication required — please enter your PIN.",
+        "TokenNotPresent": "Token not detected. Please ensure your DSC token is plugged in.",
+        "TokenNotRecognized": "Token not recognized by the middleware.",
+        "SessionHandleInvalid": "Token session expired. Please try again.",
+        "FunctionFailed": "PKCS#11 operation failed. The token may be busy or unresponsive.",
+        "GeneralError": "A general PKCS#11 error occurred.",
+        "NoSuchKey": "No signing key found on the token.",
+        "NoSuchCertificate": "No certificate found on the token.",
+        "ObjectHandleInvalid": "Token object not found — the certificate or key may be missing.",
+        "AttributeTypeInvalid": "Token attribute error — please try again.",
+    }
+    msg = mapping.get(cls)
+    if msg:
+        return msg
+    # Fallback: use str if non-empty, else use class name
+    s = str(e).strip()
+    return s if s else f"PKCS#11 error: {cls}"
+
+
 def sign_pdf(
     input_path: str,
     output_path: str,
@@ -75,52 +82,72 @@ def sign_pdf(
     contact_info: str = "",
 ) -> dict:
     """
-    Signs a PDF using the DSC token via PKCS#11 (ctypes).
+    Signs a PDF using the DSC token via PKCS#11.
 
-    Strategy:
-    - Open PKCS#11 session with the user PIN
-    - Find the signing certificate on the token
-    - Use pyHanko with a PKCS#11-backed signer
-    - Place a visible Adobe-style signature field at the given rect
-
-    Returns {"success": True, "output": path} or {"success": False, "error": "..."}
+    Returns {"success": True, "output": path} or {"success": False, "error": "..."}.
     """
+    # ── 1. Resolve DLL ──────────────────────────────────────────────────────────
+    resolved_dll = _resolve_dll(dll_path)
+    if not resolved_dll:
+        return {
+            "success": False,
+            "error": (
+                "PKCS#11 DLL not found. Ensure the Hypersecu/ePass2003 middleware is "
+                "installed, or set the DLL path manually in Settings."
+            ),
+        }
+
+    # ── 2. Import pyHanko PKCS#11 support ───────────────────────────────────────
     try:
-        # Use pyHanko's built-in PKCS#11 support — it ships its own ctypes wrapper
-        # that does NOT require python-pkcs11 to be compiled from source.
         from pyhanko.sign.pkcs11 import open_pkcs11_session, PKCS11Signer
         from pyhanko.sign import signers, fields
         from pyhanko.sign.signers.pdf_signer import PdfSignatureMetadata
         from pyhanko.sign.fields import SigFieldSpec
         from pyhanko.pdf_utils.incremental_writer import IncrementalPdfFileWriter
+    except ImportError as e:
+        return {
+            "success": False,
+            "error": (
+                f"pyHanko PKCS#11 module not available: {e}. "
+                "Please reinstall the application."
+            ),
+        }
 
-        input_p = Path(input_path)
-        output_p = Path(output_path)
-        output_p.parent.mkdir(parents=True, exist_ok=True)
-
-        # Open PKCS#11 session
+    # ── 3. Open PKCS#11 session ─────────────────────────────────────────────────
+    try:
         session = open_pkcs11_session(
-            lib_location=dll_path,
+            lib_location=resolved_dll,
             user_pin=pin,
         )
+    except Exception as e:
+        return {"success": False, "error": _pkcs11_error_message(e)}
 
-        # Build the signer
-        # NOTE: cert_label here is the CERTIFICATE OBJECT label on the token,
-        # NOT the token label (e.g. 'HYP2003'). Pass None to auto-select the
-        # first available signing certificate.
+    # ── 4. Build signer ──────────────────────────────────────────────────────────
+    try:
         signer = PKCS11Signer(
             pkcs11_session=session,
-            cert_label=None,   # auto-select first signing cert
-            key_label=None,    # auto-select first signing key
+            cert_label=None,    # auto-select first signing cert
+            key_label=None,     # auto-select first signing key
             use_raw_mechanism=False,
         )
+    except Exception as e:
+        try:
+            session.close()
+        except Exception:
+            pass
+        return {"success": False, "error": _pkcs11_error_message(e)}
 
+    # ── 5. Sign the PDF ──────────────────────────────────────────────────────────
+    input_p = Path(input_path)
+    output_p = Path(output_path)
+    output_p.parent.mkdir(parents=True, exist_ok=True)
+
+    try:
         field_name = f"Signature_{page + 1}_{int(datetime.now().timestamp())}"
 
         with open(str(input_p), "rb") as inf:
             writer = IncrementalPdfFileWriter(inf)
 
-            # Add signature field at the dragged rectangle
             sig_field_spec = SigFieldSpec(
                 sig_field_name=field_name,
                 on_page=page,
@@ -139,37 +166,25 @@ def sign_pdf(
             with open(str(output_p), "wb") as outf:
                 signers.sign_pdf(writer, meta, signer=signer, output=outf)
 
+        return {"success": True, "output": str(output_p)}
+
+    except Exception as e:
+        # Try to clean up output if partially written
+        try:
+            if output_p.exists():
+                output_p.unlink()
+        except Exception:
+            pass
+        # Provide full traceback in the error for debugging
+        tb = traceback.format_exc()
+        msg = _pkcs11_error_message(e)
+        # Append traceback type if not already meaningful
+        if "PKCS#11 error:" in msg or msg == _pkcs11_error_message(Exception()):
+            msg = f"{msg}\n\nDetails: {tb}"
+        return {"success": False, "error": msg}
+
+    finally:
         try:
             session.close()
         except Exception:
             pass
-
-        return {"success": True, "output": str(output_p)}
-
-    except ImportError:
-        # pyHanko PKCS#11 not available — fall back to ctypes-only approach
-        return _sign_with_ctypes_fallback(
-            input_path, output_path, dll_path, pin, page, rect,
-            cert_label, signer_name, reason, location
-        )
-    except Exception as e:
-        return {"success": False, "error": str(e)}
-
-
-def _sign_with_ctypes_fallback(
-    input_path, output_path, dll_path, pin, page, rect,
-    cert_label, signer_name, reason, location
-) -> dict:
-    """
-    Fallback: extracts the certificate from the token via ctypes,
-    then uses pyHanko SimpleSigner with the extracted cert + a warning
-    that hardware-backed signing was unavailable.
-    """
-    return {
-        "success": False,
-        "error": (
-            "PKCS#11 signing requires pyHanko[pkcs11] to be installed. "
-            "Please install Microsoft C++ Build Tools and run: "
-            "pip install pyhanko[pkcs11]"
-        )
-    }
