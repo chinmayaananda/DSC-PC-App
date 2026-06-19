@@ -166,6 +166,7 @@ def sign_pdf(
             )
 
             from PIL import Image
+            from pyhanko.pdf_utils.images import PdfImage
             stamp_bg = None
             if image_path:
                 try:
@@ -175,9 +176,11 @@ def sign_pdf(
             if not stamp_bg:
                 stamp_bg = Image.new("RGBA", (1, 1), (0, 0, 0, 0))
 
+            pdf_bg = PdfImage(stamp_bg, writer=None)
+
             style = TextStampStyle(
                 stamp_text="Signed by: %(signer)s\nDate: %(ts)s\nReason: %(reason)s",
-                background=stamp_bg,
+                background=pdf_bg,
             )
 
             with open(str(output_p), "wb") as outf:
